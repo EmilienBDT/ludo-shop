@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Finaliser la commande — LudoShop{% endblock %}
+
+{% block body %}
+    <h1 class="h3 mb-4">Finaliser la commande</h1>
+
+    <div class="row">
+        <div class="col-md-7">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h2 class="h5 mb-3">Adresse de livraison</h2>
+                    {{ form_start(form) }}
+                    {{ form_row(form.addressLine) }}
+                    <div class="row">
+                        <div class="col-6">{{ form_row(form.postalCode) }}</div>
+                        <div class="col-6">{{ form_row(form.city) }}</div>
+                    </div>
+                    {{ form_row(form.country) }}
+                    <button type="submit" class="btn btn-success mt-3">Confirmer la commande</button>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-5">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h2 class="h5 mb-3">Récapitulatif</h2>
+                    <ul class="list-group list-group-flush mb-3">
+                        {% for item in cart.items %}
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>{{ item.product.name }} × {{ item.quantity }}</span>
+                                <span>{{ item.lineTotal|number_format(2, ',', ' ') }} €</span>
+                            </li>
+                        {% endfor %}
+                        <li class="list-group-item d-flex justify-content-between fw-bold">
+                            <span>Total TTC</span>
+                            <span>{{ total|number_format(2, ',', ' ') }} €</span>
+                        </li>
+                    </ul>
+                    <a href="{{ path('app_cart') }}" class="btn btn-outline-secondary w-100">Retour au panier</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

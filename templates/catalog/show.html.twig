@@ -1,0 +1,173 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ product.name }} — LudoShop{% endblock %}
+
+{% block body %}
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ path('app_catalog') }}">Catalogue</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ product.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-5">
+            {% if product.image %}
+                <img src="{{ product.image }}" class="img-fluid rounded shadow-sm" alt="{{ product.name }}">
+            {% else %}
+                <img src="https://placehold.co/600x600?text=LudoShop" class="img-fluid rounded shadow-sm" alt="{{ product.name }}">
+            {% endif %}
+        </div>
+        <div class="col-md-7">
+            <h1 class="h3">{{ product.name }}</h1>
+            {% if product.isMature %}
+                <span class="badge bg-dark mb-2">+18 — Contenu mature</span>
+            {% endif %}
+            {% if averageRating is not null %}
+                <span class="badge bg-warning text-dark mb-2">
+                    ★ {{ averageRating|number_format(1, ',', '') }} / 5
+                    <small class="ms-1">({{ reviews|length }} avis)</small>
+                </span>
+            {% endif %}
+            <p class="text-muted">Référence : {{ product.reference }}</p>
+            {% if product.publisher %}
+                <p class="text-muted">Éditeur : {{ product.publisher }}</p>
+            {% endif %}
+            <p class="h4 my-3">
+                {% if isOnPromotion %}
+                    <span class="text-decoration-line-through text-muted">{{ product.price|number_format(2, ',', ' ') }} €</span>
+                    <span class="text-danger fw-bold ms-2">{{ currentPrice|number_format(2, ',', ' ') }} €</span>
+                    <small class="badge bg-danger ms-1">Promo</small>
+                {% else %}
+                    {{ product.price|number_format(2, ',', ' ') }} €
+                {% endif %}
+                <small class="text-muted fs-6">HT</small>
+            </p>
+            <p>{{ product.description }}</p>
+
+            {% if product.playtimeMinutes or product.setupMinutes or product.minAge or product.maxAge or product.minPlayers or product.maxPlayers %}
+                <div class="mt-4">
+                    <h2 class="h5">Informations</h2>
+                    <dl class="row mb-0">
+                        {% if product.playtimeMinutes %}
+                            <dt class="col-sm-6">Temps d'une partie</dt>
+                            <dd class="col-sm-6">{{ product.playtimeMinutes }} min</dd>
+                        {% endif %}
+                        {% if product.setupMinutes %}
+                            <dt class="col-sm-6">Temps de mise en place</dt>
+                            <dd class="col-sm-6">{{ product.setupMinutes }} min</dd>
+                        {% endif %}
+                        {% if product.minAge or product.maxAge %}
+                            <dt class="col-sm-6">Âge</dt>
+                            <dd class="col-sm-6">
+                                {%- if product.minAge and product.maxAge -%}
+                                    {{ product.minAge }} à {{ product.maxAge }} ans
+                                {%- elseif product.minAge -%}
+                                    {{ product.minAge }} ans et plus
+                                {%- else -%}
+                                    Jusqu'à {{ product.maxAge }} ans
+                                {%- endif -%}
+                            </dd>
+                        {% endif %}
+                        {% if product.minPlayers or product.maxPlayers %}
+                            <dt class="col-sm-6">Nombre de joueurs</dt>
+                            <dd class="col-sm-6">
+                                {%- if product.minPlayers and product.maxPlayers -%}
+                                    {{ product.minPlayers }} à {{ product.maxPlayers }} joueurs
+                                {%- elseif product.minPlayers -%}
+                                    {{ product.minPlayers }} joueurs et plus
+                                {%- else -%}
+                                    Jusqu'à {{ product.maxPlayers }} joueurs
+                                {%- endif -%}
+                            </dd>
+                        {% endif %}
+                    </dl>
+                </div>
+            {% endif %}
+
+            <div class="mt-4">
+                {% if product.stock > 0 %}
+                    <span class="badge bg-success">En stock ({{ product.stock }})</span>
+                {% else %}
+                    <span class="badge bg-danger">Rupture de stock</span>
+                    {% if app.user %}
+                        {% if hasStockAlert %}
+                            <span class="badge bg-info ms-2">Alerte active</span>
+                        {% else %}
+                            <form method="post" action="{{ path('app_stock_alert', {'id': product.id}) }}" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-info ms-2">M'avertir au retour en stock</button>
+                            </form>
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+            </div>
+
+            <div class="mt-4">
+                {% if app.user %}
+                    <form method="post" action="{{ path('app_cart_add', {'id': product.id}) }}" class="d-inline">
+                        <button type="submit" class="btn btn-primary" {{ product.stock > 0 ? '' : 'disabled' }}>
+                            Ajouter au panier
+                        </button>
+                    </form>
+                    {% if isInWishlist %}
+                        <form method="post" action="{{ path('app_wishlist_remove', {'id': product.id}) }}" class="d-inline">
+                            <button type="submit" class="btn btn-outline-danger">Retirer de la wishlist</button>
+                        </form>
+                    {% else %}
+                        <form method="post" action="{{ path('app_wishlist_add', {'id': product.id}) }}" class="d-inline">
+                            <button type="submit" class="btn btn-outline-warning">Ajouter à la wishlist</button>
+                        </form>
+                    {% endif %}
+                {% else %}
+                    <a href="{{ path('app_login') }}" class="btn btn-primary">Connectez-vous pour commander</a>
+                {% endif %}
+                <a href="{{ path('app_catalog') }}" class="btn btn-outline-secondary">Retour au catalogue</a>
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-5">
+
+    <section id="reviews">
+        <h2 class="h4 mb-4">Avis clients</h2>
+
+        {% if userReview %}
+            <div class="alert alert-info">
+                Vous avez laissé un avis : <strong>{{ userReview.rating }}/5</strong>
+                {% if userReview.comment %} — « {{ userReview.comment }} »{% endif %}
+            </div>
+        {% elseif canReview %}
+            <div class="card mb-4" style="max-width: 500px;">
+                <div class="card-body">
+                    <h3 class="card-title h6">Laisser un avis</h3>
+                    {{ form_start(reviewForm) }}
+                        <div class="mb-3">
+                            {{ form_row(reviewForm.rating) }}
+                        </div>
+                        <div class="mb-3">
+                            {{ form_row(reviewForm.comment) }}
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm">Publier</button>
+                    {{ form_end(reviewForm) }}
+                </div>
+            </div>
+        {% endif %}
+
+        {% for review in reviews %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <strong>{{ review.user.firstName }} {{ review.user.lastName }}</strong>
+                        <span class="text-warning">★ {{ review.rating }}/5</span>
+                    </div>
+                    {% if review.comment %}
+                        <p class="mt-2 mb-0">{{ review.comment }}</p>
+                    {% endif %}
+                    <small class="text-muted">Publié le {{ review.createdAt|date('d/m/Y') }}</small>
+                </div>
+            </div>
+        {% else %}
+            <p class="text-muted">Aucun avis pour le moment.</p>
+        {% endfor %}
+    </section>
+{% endblock %}

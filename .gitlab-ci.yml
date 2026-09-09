@@ -1,0 +1,153 @@
+stages:
+  - lint
+  - analyze
+  - test
+  - verify
+
+variables:
+  COMPOSER_CACHE_DIR: "$CI_PROJECT_DIR/.composer-cache"
+  PHP_VERSION: "8.3"
+
+# ──────────────────────────────────────────────
+# Ancres (DRY)
+# ──────────────────────────────────────────────
+.php-setup: &php-setup
+  image: php:${PHP_VERSION}
+  before_script:
+    - apt-get update && apt-get install -y git unzip libicu-dev libzip-dev
+    - docker-php-ext-install intl zip opcache
+    - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+    - |
+      for i in 1 2 3; do
+        composer install --prefer-dist --no-progress --no-interaction && break
+        echo "Composer install failed (attempt $i/3), retrying in 10s..."
+        sleep 10
+      done
+
+.cache-pull: &cache-pull
+  cache:
+    key: composer-${CI_COMMIT_REF_SLUG}
+    paths:
+      - .composer-cache/
+      - vendor/
+    policy: pull
+
+.cache-pull-push: &cache-pull-push
+  cache:
+    key: composer-${CI_COMMIT_REF_SLUG}
+    paths:
+      - .composer-cache/
+      - vendor/
+    policy: pull-push
+
+.default-rules: &default-rules
+  rules:
+    - if: $CI_MERGE_REQUEST_IID
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+# ──────────────────────────────────────────────
+# Stage lint — feedback ultra rapide (~30s)
+# ──────────────────────────────────────────────
+composer-validate:
+  stage: lint
+  <<: *php-setup
+  <<: *cache-pull
+  <<: *default-rules
+  script:
+    - composer validate --strict
+
+lint-config:
+  stage: lint
+  <<: *php-setup
+  <<: *cache-pull
+  <<: *default-rules
+  script:
+    - php bin/console lint:yaml config
+    - php bin/console lint:twig templates
+    - php bin/console lint:container
+
+# ──────────────────────────────────────────────
+# Stage analyze — analyse statique (~1-2min)
+# ──────────────────────────────────────────────
+cs-fixer:
+  stage: analyze
+  <<: *php-setup
+  <<: *cache-pull
+  <<: *default-rules
+  script:
+    - php vendor/bin/php-cs-fixer fix --dry-run --diff
+
+phpstan:
+  stage: analyze
+  <<: *php-setup
+  <<: *cache-pull
+  <<: *default-rules
+  script:
+    - php vendor/bin/phpstan analyse --no-progress --memory-limit=512M
+
+security-audit:
+  stage: analyze
+  <<: *php-setup
+  <<: *cache-pull
+  <<: *default-rules
+  script:
+    - composer audit --no-interaction
+
+# ──────────────────────────────────────────────
+# Stage test — unitaires + intégration + fonct. (~1-3min)
+# ──────────────────────────────────────────────
+unit-tests:
+  stage: test
+  <<: *php-setup
+  <<: *cache-pull-push
+  <<: *default-rules
+  script:
+    - php vendor/bin/phpunit --no-coverage --stderr --testsuite unit
+
+integration-tests:
+  stage: test
+  <<: *php-setup
+  <<: *cache-pull-push
+  <<: *default-rules
+  script:
+    - php vendor/bin/phpunit --no-coverage --stderr --testsuite integration
+
+functional-tests:
+  stage: test
+  <<: *php-setup
+  <<: *cache-pull-push
+  <<: *default-rules
+  script:
+    - php bin/console sass:build
+    - php vendor/bin/phpunit --no-coverage --stderr --testsuite functional
+
+# ──────────────────────────────────────────────
+# Stage verify — validation schéma + mutations
+# ──────────────────────────────────────────────
+schema-verify:
+  stage: verify
+  <<: *php-setup
+  <<: *cache-pull
+  <<: *default-rules
+  script:
+    - php bin/console doctrine:schema:validate --skip-sync
+
+infection:
+  stage: verify
+  image: php:${PHP_VERSION}
+  before_script:
+    - apt-get update && apt-get install -y git unzip libicu-dev libzip-dev
+    - docker-php-ext-install intl zip opcache
+    - pecl install pcov && docker-php-ext-enable pcov
+    - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+    - |
+      for i in 1 2 3; do
+        composer install --prefer-dist --no-progress --no-interaction && break
+        echo "Composer install failed (attempt $i/3), retrying in 10s..."
+        sleep 10
+      done
+  <<: *cache-pull
+  <<: *default-rules
+  script:
+    - php bin/console sass:build
+    - php -d memory_limit=512M vendor/bin/infection --threads=4 --show-mutations --no-progress

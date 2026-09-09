@@ -1,0 +1,56 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Utilisateurs — Administration LudoShop{% endblock %}
+
+{% block body %}
+    <h1 class="h3 mb-4">Gestion des utilisateurs</h1>
+
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+            <tr>
+                <th>Nom</th>
+                <th>E-mail</th>
+                <th>Rôle</th>
+                <th>Inscrit le</th>
+                <th>Statut</th>
+                <th class="text-end">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for user in users %}
+                <tr>
+                    <td>{{ user.fullName }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        {% if 'ROLE_ADMIN' in user.roles %}
+                            <span class="badge bg-primary">Administrateur</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Client</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ user.createdAt|date('d/m/Y') }}</td>
+                    <td>
+                        {% if user.isDeleted %}
+                            <span class="badge bg-danger">Compte supprimé</span>
+                        {% else %}
+                            <span class="badge bg-success">Actif</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        {% if not user.isDeleted %}
+                            <form method="post" action="{{ path('app_admin_user_reset_password', {'id': user.id}) }}"
+                                  onsubmit="return confirm('Envoyer un e-mail de réinitialisation de mot de passe à {{ user.email }} ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('reset_password') }}">
+                                <button type="submit" class="btn btn-sm btn-outline-primary">Envoyer un e-mail de réinitialisation</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% else %}
+                <tr><td colspan="6" class="text-center text-muted">Aucun utilisateur.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

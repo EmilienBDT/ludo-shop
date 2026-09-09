@@ -1,0 +1,16 @@
+{
+  "defaults": {
+    "timeout": 10000,
+    "wait": 2000,
+    "chromiumLaunchConfig": {
+      "args": ["--no-sandbox"]
+    }
+  },
+  "urls": [
+    "http://127.0.0.1:8000/",
+    "http://127.0.0.1:8000/catalog",
+    "http://127.0.0.1:8000/login",
+    "http://127.0.0.1:8000/register"
+  ],
+  "ignore": []
+}

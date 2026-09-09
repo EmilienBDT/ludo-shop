@@ -1,0 +1,97 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tableau de bord — Administration LudoShop{% endblock %}
+
+{% block body %}
+    <h1 class="h3 mb-4">Tableau de bord</h1>
+
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm text-center">
+                <div class="card-body">
+                    <h2 class="h6 text-muted">Chiffre d'affaires</h2>
+                    <p class="h3 mb-0">{{ totalRevenue|number_format(2, ',', ' ') }} €</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm text-center">
+                <div class="card-body">
+                    <h2 class="h6 text-muted">Commandes payées</h2>
+                    <p class="h3 mb-0">{{ orderCount }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm text-center">
+                <div class="card-body">
+                    <h2 class="h6 text-muted">Stock faible</h2>
+                    <p class="h3 mb-0">{{ lowStockProducts|length }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h2 class="h6">Top produits</h2>
+                    {% if topProducts|length > 0 %}
+                        <table class="table align-middle mb-0">
+                            <thead>
+                            <tr>
+                                <th>Produit</th>
+                                <th class="text-center">Quantité vendue</th>
+                                <th class="text-end">CA</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for product in topProducts %}
+                                <tr>
+                                    <td>{{ product.name }}</td>
+                                    <td class="text-center">{{ product.quantity }}</td>
+                                    <td class="text-end">{{ product.revenue|number_format(2, ',', ' ') }} €</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p class="text-muted mb-0">Aucune vente enregistrée.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h2 class="h6">Alertes de stock faible</h2>
+                    {% if lowStockProducts|length > 0 %}
+                        <table class="table align-middle mb-0">
+                            <thead>
+                            <tr>
+                                <th>Produit</th>
+                                <th class="text-center">Stock</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for product in lowStockProducts %}
+                                <tr>
+                                    <td>{{ product.name }}</td>
+                                    <td class="text-center">
+                                        <span class="badge bg-{{ product.stock == 0 ? 'danger' : 'warning' }}">
+                                            {{ product.stock }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p class="text-muted mb-0">Tous les stocks sont suffisants.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

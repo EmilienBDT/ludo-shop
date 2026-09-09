@@ -1,0 +1,23 @@
+{
+    "$schema": "vendor/infection/infection/resources/schema.json",
+    "source": {
+        "directories": [
+            "src"
+        ]
+    },
+    "timeout": 300,
+    "testFramework": "phpunit",
+    "testFrameworkOptions": "--testsuite=unit,integration,functional",
+    "logs": {
+        "text": "var/infection.log",
+        "summary": "var/infection-summary.log",
+        "perMutator": "var/infection-per-mutator.log"
+    },
+    "tmpDir": "var/infection",
+    "phpUnit": {
+        "configDir": "."
+    },
+    "mutators": {
+        "@default": true
+    }
+}

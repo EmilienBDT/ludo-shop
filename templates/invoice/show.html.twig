@@ -1,0 +1,78 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Facture {{ invoice.number }} — LudoShop{% endblock %}
+
+{% block body %}
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between mb-4">
+                        <div>
+                            <h1 class="h4 mb-0">LudoShop</h1>
+                            <small class="text-muted">Facture {{ invoice.number }}</small>
+                        </div>
+                        <div class="text-end">
+                            <small class="text-muted">Émise le {{ invoice.issuedAt|date('d/m/Y H:i') }}</small><br>
+                            <small>Commande {{ invoice.order.number }}</small>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <strong>Adressée à</strong><br>
+                        {{ invoice.user.fullName }}<br>
+                        {{ invoice.order.addressLine }}<br>
+                        {{ invoice.order.postalCode }} {{ invoice.order.city }}<br>
+                        {{ invoice.order.country }}
+                    </div>
+
+                    <table class="table align-middle">
+                        <thead>
+                        <tr>
+                            <th>Produit</th>
+                            <th>Prix unitaire HT</th>
+                            <th class="text-center">Quantité</th>
+                            <th class="text-end">Total HT</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for item in order.items %}
+                            <tr>
+                                <td>{{ item.productName }}</td>
+                                <td>{{ item.unitPrice|number_format(2, ',', ' ') }} €</td>
+                                <td class="text-center">{{ item.quantity }}</td>
+                                <td class="text-end">{{ item.lineTotal|number_format(2, ',', ' ') }} €</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                        <tfoot>
+                        <tr>
+                            <th colspan="3" class="text-end">Total HT</th>
+                            <th class="text-end">{{ invoice.totalHt|number_format(2, ',', ' ') }} €</th>
+                        </tr>
+                        <tr>
+                            <th colspan="3" class="text-end">TVA ({{ invoice.vatRate|number_format(0, ',', ' ') }} %)</th>
+                            <th class="text-end">{{ (invoice.totalTtc - invoice.totalHt)|number_format(2, ',', ' ') }} €</th>
+                        </tr>
+                        <tr>
+                            <th colspan="3" class="text-end">Total TTC</th>
+                            <th class="text-end">{{ invoice.totalTtc|number_format(2, ',', ' ') }} €</th>
+                        </tr>
+                        </tfoot>
+                    </table>
+
+                    <p class="text-muted small mt-4 mb-0">
+                        Paiement simulé à des fins pédagogiques. Cette facture est immuable.
+                    </p>
+                </div>
+            </div>
+            <div class="text-center mt-3">
+                {% if is_granted('ROLE_ADMIN') %}
+                    <a href="{{ path('app_admin_order_show', {'id': order.id}) }}" class="btn btn-outline-secondary">Retour à la commande</a>
+                {% else %}
+                    <a href="{{ path('app_order_show', {'id': order.id}) }}" class="btn btn-outline-secondary">Retour à la commande</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

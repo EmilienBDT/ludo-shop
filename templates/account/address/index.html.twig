@@ -1,0 +1,61 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes adresses — LudoShop{% endblock %}
+
+{% block body %}
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ path('app_account') }}">Mon compte</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Mes adresses</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Mes adresses</h1>
+        <a href="{{ path('app_address_new') }}" class="btn btn-primary">Ajouter une adresse</a>
+    </div>
+
+    {% if addresses|length == 0 %}
+        <div class="alert alert-info">
+            Vous n'avez pas encore enregistré d'adresse.
+        </div>
+    {% else %}
+        <div class="row">
+            {% for address in addresses %}
+                <div class="col-md-6 mb-3">
+                    <div class="card shadow-sm {% if address.isDefault %}border-primary{% endif %}">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h2 class="h6 mb-1">
+                                        {{ address.label }}
+                                        {% if address.isDefault %}
+                                            <span class="badge bg-primary">Par défaut</span>
+                                        {% endif %}
+                                    </h2>
+                                    <p class="mb-0 text-muted small">
+                                        {{ address.addressLine }}<br>
+                                        {{ address.postalCode }} {{ address.city }}<br>
+                                        {{ address.country }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="mt-3 d-flex gap-2">
+                                <a href="{{ path('app_address_edit', {'id': address.id}) }}" class="btn btn-outline-secondary btn-sm">Modifier</a>
+                                {% if not address.isDefault %}
+                                    <form method="post" action="{{ path('app_address_default', {'id': address.id}) }}">
+                                        <button type="submit" class="btn btn-outline-primary btn-sm">Définir par défaut</button>
+                                    </form>
+                                {% endif %}
+                                <form method="post" action="{{ path('app_address_delete', {'id': address.id}) }}"
+                                      onsubmit="return confirm('Supprimer cette adresse ?');" class="ms-auto">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">Supprimer</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ product.id ? 'Modifier' : 'Nouveau' }} produit — LudoShop{% endblock %}
+
+{% block body %}
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ path('app_admin_products') }}">Produits</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ product.id ? 'Modifier' : 'Nouveau' }}</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h1 class="h4 mb-4">{{ product.id ? 'Modifier le produit' : 'Nouveau produit' }}</h1>
+                    {{ form_start(form) }}
+                    <div class="row">
+                        <div class="col-md-8">{{ form_row(form.name) }}</div>
+                        <div class="col-md-4">{{ form_row(form.reference) }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">{{ form_row(form.publisher) }}</div>
+                        <div class="col-md-4">{{ form_row(form.price) }}</div>
+                        <div class="col-md-4">{{ form_row(form.stock) }}</div>
+                    </div>
+                    {{ form_row(form.description) }}
+                    {{ form_row(form.image) }}
+                    <div class="row">
+                        <div class="col-md-6">{{ form_row(form.playtimeMinutes) }}</div>
+                        <div class="col-md-6">{{ form_row(form.setupMinutes) }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">{{ form_row(form.minAge) }}</div>
+                        <div class="col-md-3">{{ form_row(form.maxAge) }}</div>
+                        <div class="col-md-3">{{ form_row(form.minPlayers) }}</div>
+                        <div class="col-md-3">{{ form_row(form.maxPlayers) }}</div>
+                    </div>
+                    {{ form_row(form.isActive) }}
+                    <button type="submit" class="btn btn-primary">{{ product.id ? 'Enregistrer' : 'Créer le produit' }}</button>
+                    <a href="{{ path('app_admin_products') }}" class="btn btn-outline-secondary">Annuler</a>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% if isNew %}Ajouter une adresse{% else %}Modifier l'adresse{% endif %} — LudoShop{% endblock %}
+
+{% block body %}
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ path('app_account') }}">Mon compte</a></li>
+            <li class="breadcrumb-item"><a href="{{ path('app_address_index') }}">Mes adresses</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{% if isNew %}Ajouter{% else %}Modifier{% endif %}</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h1 class="h4 mb-3">{% if isNew %}Ajouter une adresse{% else %}Modifier l'adresse{% endif %}</h1>
+
+                    {{ form_start(form) }}
+                        {{ form_row(form.label) }}
+                        {{ form_row(form.addressLine) }}
+                        <div class="row">
+                            <div class="col-4">{{ form_row(form.postalCode) }}</div>
+                            <div class="col-8">{{ form_row(form.city) }}</div>
+                        </div>
+                        {{ form_row(form.country) }}
+                        {{ form_row(form.isDefault) }}
+                        <button type="submit" class="btn btn-primary">{% if isNew %}Créer{% else %}Enregistrer{% endif %}</button>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Produits — Administration LudoShop{% endblock %}
+
+{% block body %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Gestion des produits</h1>
+        <a href="{{ path('app_admin_product_new') }}" class="btn btn-primary">Nouveau produit</a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+            <tr>
+                <th>Référence</th>
+                <th>Nom</th>
+                <th>Éditeur</th>
+                <th class="text-end">Prix HT</th>
+                <th class="text-end">Stock</th>
+                <th class="text-center">Actif</th>
+                <th class="text-center">+18</th>
+                <th class="text-end">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for product in products %}
+                <tr>
+                    <td>{{ product.reference }}</td>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.publisher }}</td>
+                    <td class="text-end">{{ product.price|number_format(2, ',', ' ') }} €</td>
+                    <td class="text-end">{{ product.stock }}</td>
+                    <td class="text-center">
+                        <span class="badge {{ product.active ? 'bg-success' : 'bg-danger' }}">
+                            {{ product.active ? 'Oui' : 'Non' }}
+                        </span>
+                    </td>
+                    <td class="text-center">
+                        {% if product.isMature %}
+                            <span class="badge bg-dark">+18</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        <a href="{{ path('app_admin_product_edit', {'id': product.id}) }}" class="btn btn-sm btn-outline-primary">Modifier</a>
+                        <form method="post" action="{{ path('app_admin_product_toggle', {'id': product.id}) }}" class="d-inline">
+                            <button type="submit" class="btn btn-sm {{ product.active ? 'btn-outline-danger' : 'btn-outline-success' }}">
+                                {{ product.active ? 'Désactiver' : 'Activer' }}
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            {% else %}
+                <tr><td colspan="8" class="text-center text-muted">Aucun produit.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

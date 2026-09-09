@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Avis — Administration LudoShop{% endblock %}
+
+{% block body %}
+    <h1 class="h3 mb-4">Modération des avis</h1>
+
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+            <tr>
+                <th>Produit</th>
+                <th>Auteur</th>
+                <th class="text-center">Note</th>
+                <th>Avis</th>
+                <th class="text-center">Statut</th>
+                <th class="text-end">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for review in reviews %}
+                <tr>
+                    <td>{{ review.product.name }}</td>
+                    <td>{{ review.user.fullName }}</td>
+                    <td class="text-center">{{ review.rating }}/5</td>
+                    <td>{{ review.comment ?: '—' }}</td>
+                    <td class="text-center">
+                        {% if review.isHidden %}
+                            <span class="badge bg-warning">Masqué</span>
+                        {% else %}
+                            <span class="badge bg-success">Visible</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        <form method="post" action="{{ path('app_admin_review_toggle', {'id': review.id}) }}" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-outline-{{ review.isHidden ? 'success' : 'warning' }}">
+                                {{ review.isHidden ? 'Afficher' : 'Masquer' }}
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            {% else %}
+                <tr><td colspan="6" class="text-center text-muted">Aucun avis.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

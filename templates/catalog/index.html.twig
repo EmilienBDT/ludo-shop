@@ -1,0 +1,172 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Catalogue — LudoShop{% endblock %}
+
+{% block body %}
+    <h1 class="h3 mb-4">Catalogue</h1>
+
+    {% set filters = [
+        {'key': 'q', 'label': 'Recherche', 'value': criteria.q|default('')},
+        {'key': 'publisher', 'label': 'Éditeur', 'value': criteria.publisher|default('')},
+        {'key': 'price_min', 'label': 'Prix min', 'value': criteria.price_min|default('')},
+        {'key': 'price_max', 'label': 'Prix max', 'value': criteria.price_max|default('')},
+        {'key': 'min_age', 'label': 'Âge min', 'value': criteria.min_age|default('')},
+        {'key': 'max_age', 'label': 'Âge max', 'value': criteria.max_age|default('')},
+        {'key': 'min_players', 'label': 'Joueurs min', 'value': criteria.min_players|default('')},
+        {'key': 'max_players', 'label': 'Joueurs max', 'value': criteria.max_players|default('')},
+        {'key': 'max_playtime', 'label': 'Durée max (min)', 'value': criteria.max_playtime|default('')},
+    ] %}
+    {% set active_filters = filters|filter(f => f.value != '' and f.value is not null) %}
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" action="{{ path('app_catalog_search') }}" class="row g-3 align-items-end" role="search">
+                <div class="col-12 col-md-4">
+                    <label for="search-q" class="form-label">Rechercher un jeu</label>
+                    <input type="search" id="search-q" name="q" value="{{ criteria.q|default('') }}" class="form-control" placeholder="Nom du jeu…">
+                </div>
+                <div class="col-12 col-md-4">
+                    <label for="search-publisher" class="form-label">Éditeur</label>
+                    <input type="text" id="search-publisher" name="publisher" value="{{ criteria.publisher|default('') }}" class="form-control" placeholder="Kosmos, Iello…">
+                </div>
+                <div class="col-12 col-md-4">
+                    <label for="search-price-min" class="form-label">Prix (€)</label>
+                    <div class="d-flex gap-2">
+                        <input type="number" id="search-price-min" name="price_min" value="{{ criteria.price_min|default('') }}" class="form-control" min="0" step="0.01" placeholder="Min">
+                        <input type="number" id="search-price-max" name="price_max" value="{{ criteria.price_max|default('') }}" class="form-control" min="0" step="0.01" placeholder="Max">
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <label for="search-min-age" class="form-label">Âge min</label>
+                    <input type="number" id="search-min-age" name="min_age" value="{{ criteria.min_age|default('') }}" class="form-control" min="0" placeholder="8 ans">
+                </div>
+                <div class="col-6 col-md-3">
+                    <label for="search-max-age" class="form-label">Âge max</label>
+                    <input type="number" id="search-max-age" name="max_age" value="{{ criteria.max_age|default('') }}" class="form-control" min="0" placeholder="12 ans">
+                </div>
+                <div class="col-6 col-md-3">
+                    <label for="search-min-players" class="form-label">Joueurs min</label>
+                    <input type="number" id="search-min-players" name="min_players" value="{{ criteria.min_players|default('') }}" class="form-control" min="1" placeholder="2">
+                </div>
+                <div class="col-6 col-md-3">
+                    <label for="search-max-players" class="form-label">Joueurs max</label>
+                    <input type="number" id="search-max-players" name="max_players" value="{{ criteria.max_players|default('') }}" class="form-control" min="1" placeholder="6">
+                </div>
+                <div class="col-12 col-md-6">
+                    <label for="search-max-playtime" class="form-label">Durée max (minutes)</label>
+                    <input type="number" id="search-max-playtime" name="max_playtime" value="{{ criteria.max_playtime|default('') }}" class="form-control" min="1" placeholder="60">
+                </div>
+                <div class="col-12 col-md-6 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Rechercher</button>
+                    {% if active_filters|length > 0 %}
+                        <a href="{{ path('app_catalog') }}" class="btn btn-outline-secondary">Réinitialiser</a>
+                    {% endif %}
+                </div>
+            </form>
+
+            {% if active_filters|length > 0 %}
+                <div class="mt-3">
+                    {% for f in active_filters %}
+                        <span class="badge text-bg-secondary me-1">{{ f.label }} : {{ f.value }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row g-4" id="product-grid">
+        {% for product in products %}
+            <div class="col-12 col-sm-6 col-md-4 product-card-wrapper">
+                <div class="card h-100 product-card shadow-sm">
+                    <div class="position-relative">
+                        {% if product.image %}
+                            <img src="{{ product.image }}" class="card-img-top" alt="{{ product.name }}">
+                        {% else %}
+                            <img src="https://placehold.co/600x400?text=LudoShop" class="card-img-top" alt="{{ product.name }}">
+                        {% endif %}
+                        {% if product.isMature %}
+                            <span class="badge bg-dark position-absolute top-0 start-0 m-2">+18</span>
+                        {% endif %}
+                        {% if app.user %}
+                            <button
+                                class="btn-wishlist position-absolute top-0 end-0 m-2"
+                                data-product-id="{{ product.id }}"
+                                data-url="{{ path('app_wishlist_toggle', {'id': product.id}) }}"
+                                aria-label="{{ product.id in (wishlistProductIds|default([])) ? 'Retirer de la wishlist' : 'Ajouter à la wishlist' }}"
+                            >
+                                {% if product.id in (wishlistProductIds|default([])) %}
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                    </svg>
+                                {% else %}
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                    </svg>
+                                {% endif %}
+                            </button>
+                        {% endif %}
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <h2 class="card-title h5">{{ product.name }}</h2>
+                        {% if product.publisher %}
+                            <p class="text-muted small">{{ product.publisher }}</p>
+                        {% endif %}
+                        <p class="card-text small text-truncate">{{ product.description }}</p>
+                        <div class="mt-auto d-flex flex-column gap-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                {% if promotionService.isOnPromotion(product) %}
+                                    <span>
+                                        <span class="text-decoration-line-through text-muted small">{{ product.price|number_format(2, ',', ' ') }} €</span>
+                                        <span class="fw-bold text-danger ms-1">{{ promotionService.getCurrentPrice(product)|number_format(2, ',', ' ') }} €</span>
+                                    </span>
+                                {% else %}
+                                    <span class="fw-bold">{{ product.price|number_format(2, ',', ' ') }} €</span>
+                                {% endif %}
+                                <a href="{{ path('app_product_show', {'id': product.id}) }}" class="btn btn-sm btn-outline-primary">Détail</a>
+                            </div>
+                            {% if app.user %}
+                                <form method="post" action="{{ path('app_cart_add', {'id': product.id}) }}">
+                                    <button type="submit" class="btn btn-sm btn-primary w-100" {{ product.stock > 0 ? '' : 'disabled' }}>
+                                        Ajouter au panier
+                                    </button>
+                                </form>
+                            {% else %}
+                                <a href="{{ path('app_login') }}" class="btn btn-sm btn-primary w-100">Connectez-vous pour commander</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <p class="text-muted">Aucun produit disponible.</p>
+        {% endfor %}
+    </div>
+
+    {% if maxPage > 1 %}
+        <div class="text-center mt-4">
+            <button id="load-more-btn"
+                    class="btn btn-outline-primary"
+                    data-page="{{ page }}"
+                    data-max-page="{{ maxPage }}"
+                    data-url="{{ path('app_catalog_fragment') }}"
+                    data-criteria="{{ criteria|json_encode|e('html_attr') }}">
+                Voir plus
+            </button>
+        </div>
+        <noscript>
+            <nav class="mt-4" aria-label="Pagination">
+                <ul class="pagination justify-content-center">
+                    {% for p in 1..maxPage %}
+                        <li class="page-item {{ p == page ? 'active' : '' }}">
+                            <a class="page-link" href="{{ path('app_catalog_search', criteria|merge({'page': p})) }}">{{ p }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </nav>
+        </noscript>
+    {% endif %}
+
+    {% block javascripts %}
+        <script src="{{ asset('js/catalog.js') }}"></script>
+    {% endblock %}
+{% endblock %}

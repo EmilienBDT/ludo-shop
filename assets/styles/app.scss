@@ -1,0 +1,11 @@
+// 1. Design tokens (Bootstrap variable overrides)
+@import 'variables';
+
+// 2. Bootstrap core
+@import '../../vendor/twbs/bootstrap/scss/bootstrap';
+
+// 3. Base styles
+@import 'base';
+
+// 4. Components
+@import 'components';

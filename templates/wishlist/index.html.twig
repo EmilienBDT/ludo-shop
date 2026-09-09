@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ma liste de souhaits — LudoShop{% endblock %}
+
+{% block body %}
+    <h1 class="h3 mb-4">Ma liste de souhaits</h1>
+
+    {% if products|length > 0 %}
+        {% if inStockProducts|length > 0 %}
+            <div class="row g-4">
+                {% set products = inStockProducts %}
+                {% include 'catalog/_product_grid.html.twig' with { wishlistPage: true } %}
+            </div>
+        {% endif %}
+
+        {% if inCartProducts|length > 0 %}
+            <h2 class="h5 mt-5 mb-3 text-muted">Déjà dans le panier</h2>
+            <div class="row g-4">
+                {% set products = inCartProducts %}
+                {% include 'catalog/_product_grid.html.twig' with { wishlistPage: true, wishlistInCart: true } %}
+            </div>
+        {% endif %}
+
+        {% if outOfStockProducts|length > 0 %}
+            <h2 class="h5 mt-5 mb-3 text-muted">En attente de re-stock</h2>
+            <div class="row g-4">
+                {% set products = outOfStockProducts %}
+                {% include 'catalog/_product_grid.html.twig' with { wishlistPage: true } %}
+            </div>
+        {% endif %}
+
+        {% if inStockProducts|length > 0 %}
+            <div class="d-flex justify-content-end mt-4">
+                <form method="post" action="{{ path('app_wishlist_add_all_to_cart') }}">
+                    <button type="submit" class="btn btn-primary">
+                        Ajouter la wishlist au panier
+                    </button>
+                </form>
+            </div>
+        {% endif %}
+    {% else %}
+        <p class="text-muted">Votre liste de souhaits est vide.</p>
+        <a href="{{ path('app_catalog') }}" class="btn btn-primary">Parcourir le catalogue</a>
+    {% endif %}
+{% endblock %}

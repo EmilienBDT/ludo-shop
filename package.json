@@ -1,0 +1,17 @@
+{
+  "name": "ludo-shop",
+  "private": true,
+  "description": "LudoShop – e-commerce de jeux de société (CI teaching)",
+  "scripts": {
+    "lint": "eslint assets/js/",
+    "lint:fix": "eslint assets/js/ --fix",
+    "format": "prettier --write \"assets/**/*.{js,scss,css}\"",
+    "format:check": "prettier --check \"assets/**/*.{js,scss,css}\"",
+    "a11y": "pa11y-ci"
+  },
+  "devDependencies": {
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "pa11y-ci": "^3.0.0"
+  }
+}

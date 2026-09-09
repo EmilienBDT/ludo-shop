@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Inscription — LudoShop{% endblock %}
+
+{% block body %}
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card auth-card shadow-sm">
+                <div class="card-body">
+                    <h1 class="h4 mb-4">Créer un compte</h1>
+                    {{ form_start(registrationForm) }}
+                    {{ form_row(registrationForm.firstName) }}
+                    {{ form_row(registrationForm.lastName) }}
+                    {{ form_row(registrationForm.birthDate) }}
+                    {{ form_row(registrationForm.email) }}
+                    {{ form_row(registrationForm.plainPassword) }}
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form_widget(registrationForm.newsletterSubscribed) }}
+                            {{ form_label(registrationForm.newsletterSubscribed) }}
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 mt-2">Créer mon compte</button>
+                    {{ form_end(registrationForm) }}
+                </div>
+            </div>
+            <p class="text-center mt-3">
+                Déjà inscrit ? <a href="{{ path('app_login') }}">Connectez-vous</a>
+            </p>
+        </div>
+    </div>
+{% endblock %}

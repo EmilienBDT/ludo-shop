@@ -1,0 +1,19 @@
+{% extends 'bootstrap_5_layout.html.twig' %}
+
+{% block form_errors %}
+    {%- if errors|length > 0 -%}
+        <div class="alert alert-danger py-2 mt-2 mb-0 small">
+            <ul class="mb-0 ps-3">
+                {%- for error in errors -%}
+                    <li>{{ error.message }}</li>
+                {%- endfor -%}
+            </ul>
+        </div>
+    {%- endif -%}
+{% endblock %}
+
+{% block form_help -%}
+    {%- if help is not empty -%}
+        <div class="form-text">{{ help|trans }}</div>
+    {%- endif -%}
+{%- endblock %}

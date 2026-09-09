@@ -1,0 +1,84 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Commande {{ order.number }} — Administration LudoShop{% endblock %}
+
+{% block body %}
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ path('app_admin_orders') }}">Commandes</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ order.number }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h1 class="h4">Commande {{ order.number }}</h1>
+                    <p class="text-muted">
+                        Client : {{ order.user.fullName }} ({{ order.user.email }}) —
+                        Passée le {{ order.createdAt|date('d/m/Y H:i') }} —
+                        <span class="badge bg-secondary">{{ order.status.label }}</span>
+                    </p>
+
+                    <h2 class="h6">Adresse de livraison</h2>
+                    <p class="mb-4">
+                        {{ order.addressLine }}<br>
+                        {{ order.postalCode }} {{ order.city }}<br>
+                        {{ order.country }}
+                    </p>
+
+                    <table class="table align-middle">
+                        <thead>
+                        <tr>
+                            <th>Produit</th>
+                            <th>Prix unitaire</th>
+                            <th class="text-center">Quantité</th>
+                            <th class="text-end">Total</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for item in order.items %}
+                            <tr>
+                                <td>{{ item.productName }}</td>
+                                <td>{{ item.unitPrice|number_format(2, ',', ' ') }} €</td>
+                                <td class="text-center">{{ item.quantity }}</td>
+                                <td class="text-end">{{ item.lineTotal|number_format(2, ',', ' ') }} €</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                        <tfoot>
+                        <tr>
+                            <th colspan="3" class="text-end">Total TTC</th>
+                            <th class="text-end">{{ order.totalAmount|number_format(2, ',', ' ') }} €</th>
+                        </tr>
+                        </tfoot>
+                    </table>
+
+                    {% if order.invoice %}
+                        <p class="mb-0">
+                            <a href="{{ path('app_invoice_show', {'id': order.id}) }}">Voir la facture ({{ order.invoice.number }})</a>
+                        </p>
+                    {% else %}
+                        <p class="text-muted small mb-0">Aucune facture (émise uniquement après le paiement).</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h2 class="h6">Changer le statut</h2>
+                    {% if allowedStatuses|length > 0 %}
+                        {{ form_start(statusForm, {'action': path('app_admin_order_status', {'id': order.id})}) }}
+                        {{ form_row(statusForm.status) }}
+                        {{ form_row(statusForm.submit) }}
+                        {{ form_end(statusForm) }}
+                    {% else %}
+                        <p class="text-muted small mb-0">Aucune transition autorisée depuis cet état (état terminal).</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

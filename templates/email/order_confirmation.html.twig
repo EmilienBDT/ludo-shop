@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmation de commande — LudoShop</title>
+</head>
+<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <h1 style="color: #2c3e50;">Merci pour votre commande !</h1>
+
+    <p>Bonjour {{ user.firstName }},</p>
+
+    <p>Votre commande <strong>n°{{ order.number }}</strong> a bien été enregistrée.</p>
+
+    <h2 style="color: #2c3e50; font-size: 1.1em;">Détail de la commande</h2>
+
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+        <thead>
+            <tr style="background-color: #f8f9fa;">
+                <th style="padding: 8px; text-align: left; border-bottom: 2px solid #dee2e6;">Produit</th>
+                <th style="padding: 8px; text-align: center; border-bottom: 2px solid #dee2e6;">Qté</th>
+                <th style="padding: 8px; text-align: right; border-bottom: 2px solid #dee2e6;">Prix</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #dee2e6;">{{ item.productName }}</td>
+                <td style="padding: 8px; text-align: center; border-bottom: 1px solid #dee2e6;">{{ item.quantity }}</td>
+                <td style="padding: 8px; text-align: right; border-bottom: 1px solid #dee2e6;">{{ item.lineTotal|number_format(2, ',', ' ') }} &euro;</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="2" style="padding: 8px; text-align: right;"><strong>Total TTC :</strong></td>
+                <td style="padding: 8px; text-align: right;"><strong>{{ order.totalAmount|number_format(2, ',', ' ') }} &euro;</strong></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <h2 style="color: #2c3e50; font-size: 1.1em;">Adresse de livraison</h2>
+    <p style="margin-bottom: 20px;">
+        {{ order.addressLine }}<br>
+        {{ order.postalCode }} {{ order.city }}<br>
+        {{ order.country }}
+    </p>
+
+    <p>
+        <a href="{{ url('app_order_show', {'id': order.id}) }}" style="display: inline-block; padding: 12px 24px; background-color: #0d6efd; color: #fff; text-decoration: none; border-radius: 5px;">
+            Voir ma commande
+        </a>
+    </p>
+
+    <p style="color: #6c757d; font-size: 0.9em; margin-top: 30px;">
+        LudoShop — Projet pédagogique (IUT) — Paiement simulé
+    </p>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statut de votre commande — LudoShop</title>
+</head>
+<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <h1 style="color: #2c3e50;">Statut de votre commande</h1>
+
+    <p>Bonjour {{ user.firstName }},</p>
+
+    <p>Le statut de votre commande <strong>n°{{ order.number }}</strong> a été mis à jour.</p>
+
+    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; text-align: center;">
+        <p style="margin: 0; font-size: 1.1em;">Nouveau statut :</p>
+        <p style="margin: 5px 0 0 0; font-size: 1.3em; font-weight: bold; color: #0d6efd;">{{ order.status.label }}</p>
+    </div>
+
+    <p>
+        <a href="{{ url('app_order_show', {'id': order.id}) }}" style="display: inline-block; padding: 12px 24px; background-color: #0d6efd; color: #fff; text-decoration: none; border-radius: 5px;">
+            Voir ma commande
+        </a>
+    </p>
+
+    <p style="color: #6c757d; font-size: 0.9em; margin-top: 30px;">
+        LudoShop — Projet pédagogique (IUT) — Paiement simulé
+    </p>
+</body>
+</html>

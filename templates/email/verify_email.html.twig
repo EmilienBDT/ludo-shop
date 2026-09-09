@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Confirmez votre adresse e-mail{% endblock %}
+
+{% block body %}
+    <h1>Confirmez votre adresse e-mail</h1>
+
+    <p>Bonjour {{ user.fullName }},</p>
+    <p>Pour activer votre compte LudoShop, veuillez confirmer votre adresse e-mail en cliquant sur le
+        lien ci-dessous :</p>
+
+    <p>
+        <a href="{{ verificationUrl }}" class="btn btn-primary">Confirmer mon adresse e-mail</a>
+    </p>
+
+    <p class="text-muted small">
+        Ce lien est à usage unique et expirera. Si vous n'êtes pas à l'origine de cette demande,
+        ignorez cet e-mail.
+    </p>
+{% endblock %}

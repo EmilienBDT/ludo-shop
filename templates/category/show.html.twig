@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ category.name }} — LudoShop{% endblock %}
+
+{% block body %}
+    <h1 class="h3 mb-4">{{ category.name }}</h1>
+
+    <div class="row g-4">
+        {% for product in products %}
+            <div class="col-12 col-sm-6 col-md-4">
+                <div class="card h-100 product-card shadow-sm">
+                    <div class="position-relative">
+                        {% if product.image %}
+                            <img src="{{ product.image }}" class="card-img-top" alt="{{ product.name }}">
+                        {% else %}
+                            <img src="https://placehold.co/600x400?text=LudoShop" class="card-img-top" alt="{{ product.name }}">
+                        {% endif %}
+                        {% if product.isMature %}
+                            <span class="badge bg-dark position-absolute top-0 start-0 m-2">+18</span>
+                        {% endif %}
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <h2 class="card-title h5">{{ product.name }}</h2>
+                        {% if product.publisher %}
+                            <p class="text-muted small">{{ product.publisher }}</p>
+                        {% endif %}
+                        <p class="card-text small text-truncate">{{ product.description }}</p>
+                        <div class="mt-auto d-flex flex-column gap-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">{{ product.price|number_format(2, ',', ' ') }} €</span>
+                                <a href="{{ path('app_product_show', {'id': product.id}) }}" class="btn btn-sm btn-outline-primary">Détail</a>
+                            </div>
+                            {% if app.user %}
+                                <form method="post" action="{{ path('app_cart_add', {'id': product.id}) }}">
+                                    <button type="submit" class="btn btn-sm btn-primary w-100" {{ product.stock > 0 ? '' : 'disabled' }}>
+                                        Ajouter au panier
+                                    </button>
+                                </form>
+                            {% else %}
+                                <a href="{{ path('app_login') }}" class="btn btn-sm btn-primary w-100">Connectez-vous pour commander</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <p class="text-muted">Aucun produit dans cette catégorie.</p>
+        {% endfor %}
+    </div>
+{% endblock %}

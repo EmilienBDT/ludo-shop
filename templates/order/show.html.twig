@@ -1,0 +1,112 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Commande {{ order.number }} — LudoShop{% endblock %}
+
+{% block body %}
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ path('app_orders') }}">Mes commandes</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ order.number }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h1 class="h4">Commande {{ order.number }}</h1>
+                    <p class="text-muted">
+                        Passée le {{ order.createdAt|date('d/m/Y H:i') }} —
+                        <span class="badge bg-secondary">{{ order.status.label }}</span>
+                    </p>
+
+                    <h2 class="h6 mt-4">Adresse de livraison</h2>
+                    <p class="mb-4">
+                        {{ order.addressLine }}<br>
+                        {{ order.postalCode }} {{ order.city }}<br>
+                        {{ order.country }}
+                    </p>
+
+                    <table class="table align-middle">
+                        <thead>
+                        <tr>
+                            <th>Produit</th>
+                            <th>Prix unitaire</th>
+                            <th class="text-center">Quantité</th>
+                            <th class="text-end">Total</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for item in order.items %}
+                            <tr>
+                                <td>{{ item.productName }}</td>
+                                <td>{{ item.unitPrice|number_format(2, ',', ' ') }} €</td>
+                                <td class="text-center">{{ item.quantity }}</td>
+                                <td class="text-end">{{ item.lineTotal|number_format(2, ',', ' ') }} €</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                        <tfoot>
+                        <tr>
+                            <th colspan="3" class="text-end">Total HT</th>
+                            <th class="text-end">{{ order.totalHt|number_format(2, ',', ' ') }} €</th>
+                        </tr>
+                        <tr>
+                            <th colspan="3" class="text-end">TVA ({{ order.vatRate|number_format(0, ',', ' ') }} %)</th>
+                            <th class="text-end">{{ order.vatAmount|number_format(2, ',', ' ') }} €</th>
+                        </tr>
+                        <tr>
+                            <th colspan="3" class="text-end">Total TTC</th>
+                            <th class="text-end">{{ order.totalAmount|number_format(2, ',', ' ') }} €</th>
+                        </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h2 class="h6">Actions</h2>
+                    {% if order.status.value == 'pending' %}
+                        <form method="post" action="{{ path('app_order_pay', {'id': order.id}) }}" class="mb-2">
+                            <button type="submit" class="btn btn-success w-100">Payer maintenant (simulation)</button>
+                        </form>
+                        <form method="post" action="{{ path('app_order_cancel', {'id': order.id}) }}"
+                              onsubmit="return confirm('Annuler cette commande ?');">
+                            <button type="submit" class="btn btn-outline-danger w-100">Annuler la commande</button>
+                        </form>
+                    {% elseif order.invoice %}
+                        <a href="{{ path('app_invoice_show', {'id': order.id}) }}" class="btn btn-outline-primary w-100 mb-2">
+                            Voir la facture
+                        </a>
+                        <a href="{{ path('app_invoice_print', {'id': order.id}) }}" class="btn btn-outline-secondary w-100">
+                            Imprimer la facture
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if order.statusHistory|length > 0 %}
+                <div class="card shadow-sm mt-3">
+                    <div class="card-body">
+                        <h2 class="h6">Suivi de commande</h2>
+                        <ul class="list-unstyled mb-0">
+                            {% for entry in order.statusHistory %}
+                                <li class="mb-2">
+                                    <span class="badge bg-secondary">{{ entry.status.label }}</span>
+                                    <small class="text-muted">
+                                        {{ entry.changedAt|date('d/m/Y H:i') }}
+                                        {% if entry.changedBy %}
+                                            — {{ entry.changedBy.fullName }}
+                                        {% endif %}
+                                    </small>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
