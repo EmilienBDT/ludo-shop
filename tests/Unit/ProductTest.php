@@ -20,7 +20,7 @@ class ProductTest extends TestCase
     public function testIsMatureReturnsFalseByDefault(): void
     {
         $product = new Product();
-        
+
         $this->assertFalse($product->isMature());
     }
 
