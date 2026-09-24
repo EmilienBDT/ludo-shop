@@ -27,79 +27,79 @@ class PromotionServiceTest extends TestCase
 
     public function testReturnsPromoPriceDuringPeriod(): void
     {
-        $product = $this->createProduct(50.00,35.00);
+        $product = $this->createProduct(50.00, 35.00);
         $product->setPromoStartsAt(new \DateTimeImmutable('2026-09-01 00:00:00'));
         $product->setPromoEndsAt(new \DateTimeImmutable('2026-11-30 23:59:59'));
-        
+
         $this->assertSame(35.00, $this->service->getCurrentPrice($product));
         $this->assertTrue($this->service->isOnPromotion($product));
     }
 
     public function testReturnsNormalPriceBeforePromotionPeriod(): void
     {
-        $product = $this->createProduct(50.00,35.00);
+        $product = $this->createProduct(50.00, 35.00);
         $product->setPromoStartsAt(new \DateTimeImmutable('2026-12-01 00:00:00'));
         $product->setPromoEndsAt(new \DateTimeImmutable('2026-12-31 23:59:59'));
-        
+
         $this->assertSame(50.00, $this->service->getCurrentPrice($product));
         $this->assertFalse($this->service->isOnPromotion($product));
     }
 
     public function testReturnsNormalPriceAfterPromotionPeriod(): void
     {
-        $product = $this->createProduct(50.00,35.00);
+        $product = $this->createProduct(50.00, 35.00);
         $product->setPromoStartsAt(new \DateTimeImmutable('2026-08-01 00:00:00'));
         $product->setPromoEndsAt(new \DateTimeImmutable('2026-08-31 23:59:59'));
-        
+
         $this->assertSame(50.00, $this->service->getCurrentPrice($product));
         $this->assertFalse($this->service->isOnPromotion($product));
     }
 
     public function testPromoPriceEqualToNormalIsNotActive(): void
     {
-        $product = $this->createProduct(50.00,50.00);
+        $product = $this->createProduct(50.00, 50.00);
         $product->setPromoStartsAt(new \DateTimeImmutable('2026-09-01 00:00:00'));
         $product->setPromoEndsAt(new \DateTimeImmutable('2026-11-30 23:59:59'));
-        
+
         $this->assertSame(50.00, $this->service->getCurrentPrice($product));
         $this->assertFalse($this->service->isOnPromotion($product));
     }
 
     public function testPromoPriceGreaterThanNormalIsNotActive(): void
     {
-        $product = $this->createProduct(50.00,65.00);
+        $product = $this->createProduct(50.00, 65.00);
         $product->setPromoStartsAt(new \DateTimeImmutable('2026-09-01 00:00:00'));
         $product->setPromoEndsAt(new \DateTimeImmutable('2026-11-30 23:59:59'));
-        
+
         $this->assertSame(50.00, $this->service->getCurrentPrice($product));
         $this->assertFalse($this->service->isOnPromotion($product));
     }
 
     public function testInvertedDatesAreNotActive(): void
     {
-        $product = $this->createProduct(50.00,35.00);
+        $product = $this->createProduct(50.00, 35.00);
         $product->setPromoStartsAt(new \DateTimeImmutable('2026-11-30 23:59:59'));
         $product->setPromoEndsAt(new \DateTimeImmutable('2026-09-01 00:00:00'));
-        
+
         $this->assertFalse($this->service->isOnPromotion($product));
     }
 
     public function testBoundaryStartIsIncluded(): void
     {
-        $product = $this->createProduct(50.00,35.00);
+        $product = $this->createProduct(50.00, 35.00);
         $product->setPromoStartsAt(new \DateTimeImmutable('2026-09-01 00:00:00'));
         $product->setPromoEndsAt(new \DateTimeImmutable('2026-11-30 23:59:59'));
-        
-        $this->assertTrue($this->service->isOnPromotion($product,$product->getPromoStartsAt()));
+
+        $this->assertTrue($this->service->isOnPromotion($product, $product->getPromoStartsAt()));
     }
 
     public function testBoundaryEndIsIncluded(): void
     {
-        $product = $this->createProduct(50.00,35.00);
+        $product = $this->createProduct(50.00, 35.00);
         $product->setPromoStartsAt(new \DateTimeImmutable('2026-09-01 00:00:00'));
         $product->setPromoEndsAt(new \DateTimeImmutable('2026-11-30 23:59:59'));
-        
-        $this->assertTrue($this->service->isOnPromotion($product,$product->getPromoEndsAt()));
+
+        $this->assertTrue($this->service->isOnPromotion($product, $product->getPromoEndsAt()));
     }
 
     private function createProduct(float $price, ?float $promoPrice = null): Product
