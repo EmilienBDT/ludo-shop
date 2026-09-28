@@ -2,3 +2,4 @@
 02-promotion
 03-cart-service
 04-schema-validation
+05-fixtures-check
