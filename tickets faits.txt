@@ -4,3 +4,4 @@
 04-schema-validation
 05-fixtures-check
 06-login
+07-catalog
