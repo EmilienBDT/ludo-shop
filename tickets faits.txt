@@ -6,3 +6,4 @@
 06-login
 07-catalog
 08-cart
+09-checkout
