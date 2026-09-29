@@ -5,3 +5,4 @@
 05-fixtures-check
 06-login
 07-catalog
+08-cart
