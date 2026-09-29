@@ -7,3 +7,4 @@
 07-catalog
 08-cart
 09-checkout
+10-order-status
