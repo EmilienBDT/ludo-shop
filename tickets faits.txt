@@ -1,0 +1,11 @@
+01-product
+02-promotion
+03-cart-service
+04-schema-validation
+05-fixtures-check
+06-login
+07-catalog
+08-cart
+09-checkout
+10-order-status
+11-promo-panier
