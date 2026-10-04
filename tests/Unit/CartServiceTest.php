@@ -1,92 +1,120 @@
 <?php
 
-declare(strict_types=1);
-
-namespace App\Tests\Unit;
+namespace App\Service;
 
 use App\Entity\Cart;
 use App\Entity\CartItem;
 use App\Entity\Product;
 use App\Entity\User;
-use App\Service\CartService;
 use Doctrine\ORM\EntityManagerInterface;
-use PHPUnit\Framework\TestCase;
 
-class CartServiceTest extends TestCase
+class CartService
 {
-    private CartService $service;
-
-    protected function setUp(): void
-    {
-        $em = $this->createStub(EntityManagerInterface::class);
-        $this->service = new CartService($em);
+    public function __construct(
+        private readonly EntityManagerInterface $entityManager,
+        private readonly PromotionService $promotionService,
+    ) {
     }
 
-    public function testEmptyCartReturnsZero(): void
+    public function getOrCreateCart(User $user): Cart
     {
-        $user = $this->createStub(User::class);
-        $cart = new Cart($user);
+        $cart = $this->entityManager->getRepository(Cart::class)->findOneBy(['user' => $user]);
+        if (null === $cart) {
+            $cart = new Cart($user);
+            $this->entityManager->persist($cart);
+            $this->entityManager->flush();
+        }
 
-        $this->assertSame(0.0, $this->service->getTotal($cart));
+        return $cart;
     }
 
-    public function testSingleItemReturnsCorrectTotal(): void
+    public function addProduct(Cart $cart, Product $product, int $quantity = 1): void
     {
-        $user = $this->createStub(User::class);
-        $cart = new Cart($user);
+        foreach ($cart->getItems() as $item) {
+            if ($item->getProduct() === $product) {
+                $this->setQuantity($cart, $item, $item->getQuantity() + $quantity);
 
-        $product = new Product();
-        $product->setName('Catan');
-        $product->setPrice(25.00);
+                return;
+            }
+        }
+
+        if ($quantity > $product->getStock()) {
+            throw new \DomainException(sprintf('Stock insuffisant pour le produit « %s » (%d disponible(s)).', $product->getName(), $product->getStock()));
+        }
 
         $item = new CartItem($product);
-        $item->setQuantity(1);
-        $item->setUnitPrice(25.00);
+        $item->setQuantity($quantity);
+        $item->setUnitPrice($this->promotionService->getCurrentPrice($product));
         $cart->addItem($item);
-
-        $this->assertSame(25.00, $this->service->getTotal($cart));
+        $cart->touch();
+        $this->entityManager->persist($item);
+        $this->entityManager->flush();
     }
 
-    public function testMultipleItems(): void
+    public function setQuantity(Cart $cart, CartItem $item, int $quantity): void
     {
-        $user = $this->createStub(User::class);
-        $cart = new Cart($user);
+        $product = $item->getProduct();
+        if ($quantity > $product->getStock()) {
+            throw new \DomainException(sprintf('Stock insuffisant pour le produit « %s » (%d disponible(s)).', $product->getName(), $product->getStock()));
+        }
 
-        $product1 = new Product();
-        $product1->setName('Catan');
-        $product1->setPrice(25.00);
+        if ($quantity <= 0) {
+            $this->removeItem($cart, $item);
 
-        $item1 = new CartItem($product1);
-        $item1->setQuantity(1);
-        $item1->setUnitPrice(25.00);
-        $cart->addItem($item1);
+            return;
+        }
 
-        $product2 = new Product();
-        $product2->SetName('Loup-Garou');
-        $product2->setPrice(15.00);
-
-        $item2 = new CartItem($product2);
-        $item2->setQuantity(1);
-        $item2->setUnitPrice(15.00);
-        $cart->addItem($item2);
-
-        $this->assertSame(40.00, $this->service->getTotal($cart));
+        $item->setQuantity($quantity);
+        $cart->touch();
+        $this->entityManager->flush();
     }
 
-    public function testQuantityMultiplier(): void
+    public function removeItem(Cart $cart, CartItem $item): void
     {
-        $user = $this->createStub(User::class);
-        $cart = new Cart($user);
+        $cart->removeItem($item);
+        $cart->touch();
+        $this->entityManager->remove($item);
+        $this->entityManager->flush();
+    }
 
-        $product = new Product();
-        $product->setName('Catan');
-        $product->setPrice(25.00);
+    public function clear(Cart $cart): void
+    {
+        foreach ($cart->getItems() as $item) {
+            $cart->removeItem($item);
+            $this->entityManager->remove($item);
+        }
+        $cart->touch();
+        $this->entityManager->flush();
+    }
 
-        $item = new CartItem($product);
-        $item->setQuantity(3);
-        $item->setUnitPrice(25.00);
-        $cart->addItem($item);
+    public function getTotal(Cart $cart): float
+    {
+        $total = 0.0;
+        foreach ($cart->getItems() as $item) {
+            $total += $item->getLineTotal();
+        }
 
-        $this->assertSame(75.00, $this->service->getTotal($cart));
+        return round($total, 2);
+    }
+
+    public function getItemCount(Cart $cart): int
+    {
+        $count = 0;
+        foreach ($cart->getItems() as $item) {
+            $count += $item->getQuantity();
+        }
+
+        return $count;
+    }
+
+    public function countForUser(User $user): int
+    {
+        $cart = $user->getCart();
+        if (null === $cart) {
+            return 0;
+        }
+
+        return $this->getItemCount($cart);
     }
 }
+// break

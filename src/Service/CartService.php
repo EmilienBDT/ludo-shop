@@ -10,8 +10,10 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class CartService
 {
-    public function __construct(private readonly EntityManagerInterface $entityManager)
-    {
+    public function __construct(
+        private readonly EntityManagerInterface $entityManager,
+        private readonly PromotionService $promotionService,
+    ) {
     }
 
     public function getOrCreateCart(User $user): Cart
@@ -42,7 +44,7 @@ class CartService
 
         $item = new CartItem($product);
         $item->setQuantity($quantity);
-        $item->setUnitPrice($product->getPrice());
+        $item->setUnitPrice($this->promotionService->getCurrentPrice($product));
         $cart->addItem($item);
         $cart->touch();
         $this->entityManager->persist($item);
